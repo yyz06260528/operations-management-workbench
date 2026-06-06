@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>运营管理工作台</title>
+<style>
+:root{--navy:#09192f;--blue:#3478f6;--ink:#172238;--muted:#7c899e;--line:#e6ebf2;--bg:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei",Inter,system-ui,sans-serif}.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}.sidebar{position:relative;background:linear-gradient(180deg,#0b1d36 0%,#09172b 100%);color:#fff;padding:26px 18px}.brand{display:flex;align-items:center;gap:11px;padding:0 8px 26px;font-size:17px;font-weight:700}.brandmark{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#68a7ff,#2873ee);display:grid;place-items:center;box-shadow:0 8px 20px #1764cf55}.label{font-size:10px;color:#57708f;letter-spacing:1.5px;padding:19px 13px 8px}.nav{display:grid;gap:5px}.navitem{padding:11px 13px;border-radius:9px;color:#a8bad0;font-size:12px}.navitem.active{background:linear-gradient(90deg,#3478f6,#2868d8);color:#fff;box-shadow:0 8px 20px #1764cf33}.badge{float:right;background:#ef5662;color:white;border-radius:10px;padding:1px 6px}.account{position:absolute;left:18px;right:18px;bottom:22px;padding:12px;border:1px solid #ffffff12;background:#ffffff08;border-radius:11px;font-size:11px;color:#91a8c2}.account b{display:block;color:#fff;margin-bottom:4px}.workspace{padding:0 28px 30px}.header{height:76px;display:flex;align-items:center;justify-content:space-between}.hello h1{font-size:21px;margin:0}.hello p{font-size:11px;color:var(--muted);margin:5px 0 0}.head-actions{display:flex;align-items:center;gap:9px}.search,.date{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:11px;color:#77859a}.search{width:205px}.primary{background:linear-gradient(135deg,#3c83fa,#286be1);color:#fff;border-radius:10px;padding:11px 15px;font-size:11px;box-shadow:0 8px 18px #3478f633}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;min-height:112px;box-shadow:0 5px 18px #203b6808}.kpi-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#748298}.ico{width:31px;height:31px;border-radius:9px;display:grid;place-items:center}.ib{background:#edf4ff;color:#3478f6}.ig{background:#eaf9f3;color:#17a26b}.io{background:#fff4e6;color:#df8a16}.ir{background:#ffeded;color:#dc4b57}.ip{background:#f2edff;color:#7958de}.value{font-size:25px;font-weight:750;margin:8px 0 3px}.hint{font-size:9px;color:#8b97a8}.positive{color:#159d68}.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.72fr);gap:16px;margin-top:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 5px 18px #203b6808}.ptitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.ptitle h2{font-size:13px;margin:0}.ptitle a{font-size:9px;color:#3478f6}.overview{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.chart{height:184px;position:relative;border-bottom:1px solid #e8edf4;background:linear-gradient(180deg,#fff,#fbfdff)}.chart:before,.chart:after{content:"";position:absolute;left:0;right:0;border-top:1px dashed #e9edf3}.chart:before{top:55px}.chart:after{top:110px}.line{position:absolute;left:4%;right:4%;top:35px;height:115px}.line svg{width:100%;height:100%;overflow:visible}.legend{display:flex;gap:14px;margin-top:10px;font-size:9px;color:#8190a3}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.projects{display:grid;gap:10px}.project{padding:11px;border:1px solid #edf1f5;border-radius:10px}.project-top{display:flex;justify-content:space-between;font-size:10px}.project p{font-size:9px;color:#8995a6;margin:5px 0 9px}.track{height:5px;background:#edf1f5;border-radius:6px;overflow:hidden}.track span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#68a7ff,#3478f6)}.rightstack{display:grid;gap:16px}.focus{display:grid;gap:9px}.focusrow{display:grid;grid-template-columns:31px 1fr auto;gap:9px;align-items:center;padding:10px;border:1px solid #edf1f5;border-radius:10px}.focusrow b{font-size:10px}.focusrow p{font-size:9px;color:#8a96a6;margin:3px 0 0}.chip{font-size:8px;padding:4px 7px;border-radius:20px}.cred{background:#ffeded;color:#d94b55}.corange{background:#fff4e6;color:#c57b18}.cblue{background:#edf4ff;color:#3478f6}.agenda{display:grid;gap:8px}.event{display:grid;grid-template-columns:43px 3px 1fr;gap:9px;align-items:center}.time{font-size:9px;color:#76859a;text-align:right}.eventbar{height:36px;border-radius:4px;background:#3a7ff2}.event div:last-child{font-size:10px}.event small{display:block;color:#8a96a6;margin-top:3px}.lower{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:16px;margin-top:16px}.tabs{display:flex;gap:6px}.tab{font-size:8px;padding:6px 9px;background:#f4f6f9;color:#76849a;border-radius:7px}.tab.active{background:#edf4ff;color:#3478f6}.table{width:100%;border-collapse:collapse}.table th{font-size:8px;color:#8995a5;text-align:left;padding:9px 7px;border-bottom:1px solid #edf1f5}.table td{font-size:9px;padding:11px 7px;border-bottom:1px solid #f0f3f7}.avatar{width:23px;height:23px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;background:#5a8ce7;margin-right:6px}.status{padding:4px 7px;border-radius:15px;background:#edf4ff;color:#3478f6}.todo{display:grid;gap:8px}.todo-row{display:grid;grid-template-columns:17px 1fr auto;gap:8px;align-items:center;padding:9px;border:1px solid #edf1f5;border-radius:9px}.check{width:15px;height:15px;border:1px solid #ccd5e1;border-radius:4px}.todo-row b{font-size:9px}.todo-row small{display:block;color:#8b97a8;margin-top:3px}.query{grid-column:1/-1;background:linear-gradient(130deg,#102d56,#1769d2);color:white;border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 26px #174f9a2c}.query h3{font-size:12px;margin:0}.query p{font-size:9px;color:#bcd4f2;margin:5px 0 0}.ask{width:47%;background:#fff;color:#8190a3;padding:11px 13px;border-radius:9px;font-size:9px}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><span class="brandmark">O</span>运营管理工作台</div>
+  <div class="nav">
+    <div class="navitem active">▦　运营总览</div><div class="navitem">✓　任务管理</div><div class="navitem">◇　项目管理</div><div class="navitem">▤　工作日报</div><div class="navitem">☑　今日待办</div>
+    <div class="label">协作管理</div><div class="navitem">□　日历与会议</div><div class="navitem">◎　审核反馈 <span class="badge">4</span></div><div class="navitem">♙　团队成员</div><div class="navitem">▱　文件归档</div>
+    <div class="label">数据与系统</div><div class="navitem">♢　提醒中心 <span class="badge">5</span></div><div class="navitem">▥　数据报表</div><div class="navitem">⚙　系统设置</div>
+  </div>
+  <div class="account"><b>管理员 · 运营主管</b>今日团队在线 8 / 9</div>
+</aside>
+<main class="workspace">
+  <header class="header">
+    <div class="hello"><h1>运营指挥中心</h1><p>2026 年 6 月 6 日 · 实时掌握团队、项目与重要日程</p></div>
+    <div class="head-actions"><div class="search">⌕　搜索任务、项目、成员或文件</div><div class="date">本周⌄</div><div class="primary">＋ 新建工作项</div></div>
+  </header>
+  <section class="kpis">
+    <div class="kpi"><div class="kpi-top">进行中任务 <span class="ico ib">✓</span></div><div class="value">18</div><div class="hint"><span class="positive">↑ 12%</span> 较上周</div></div>
+    <div class="kpi"><div class="kpi-top">本周完成率 <span class="ico ig">↗</span></div><div class="value">76%</div><div class="hint">24 / 32 项已完成</div></div>
+    <div class="kpi"><div class="kpi-top">待审核事项 <span class="ico io">⌛</span></div><div class="value">4</div><div class="hint">最长等待 18 小时</div></div>
+    <div class="kpi"><div class="kpi-top">异常与逾期 <span class="ico ir">!</span></div><div class="value">3</div><div class="hint">2 项逾期 · 1 人缺日报</div></div>
+    <div class="kpi"><div class="kpi-top">今日会议 <span class="ico ip">□</span></div><div class="value">3</div><div class="hint">下一场 10:30 开始</div></div>
+  </section>
+  <section class="grid">
+    <div class="panel">
+      <div class="ptitle"><h2>运营健康趋势</h2><a>查看分析报告 →</a></div>
+      <div class="overview">
+        <div>
+          <div class="chart"><div class="line"><svg viewBox="0 0 600 120" preserveAspectRatio="none"><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3478f6" stop-opacity=".26"/><stop offset="1" stop-color="#3478f6" stop-opacity="0"/></linearGradient></defs><path d="M0 95 C60 80 75 65 125 72 S220 45 280 58 S370 22 430 35 S520 18 600 8 L600 120 L0 120Z" fill="url(#fill)"/><path d="M0 95 C60 80 75 65 125 72 S220 45 280 58 S370 22 430 35 S520 18 600 8" fill="none" stroke="#3478f6" stroke-width="3"/><path d="M0 105 C90 98 130 92 180 96 S290 80 355 85 S480 65 600 70" fill="none" stroke="#9eb9df" stroke-width="2" stroke-dasharray="6 6"/></svg></div></div>
+          <div class="legend"><span><i style="background:#3478f6"></i>任务完成率</span><span><i style="background:#9eb9df"></i>日报提交率</span></div>
+        </div>
+        <div class="projects">
+          <div class="project"><div class="project-top"><b>网站产品页优化</b><span>82%</span></div><p>12 项任务 · 2 项待审核</p><div class="track"><span style="width:82%"></span></div></div>
+          <div class="project"><div class="project-top"><b>Alibaba 产品更新</b><span>64%</span></div><p>8 项任务 · 1 项逾期</p><div class="track"><span style="width:64%;background:linear-gradient(90deg,#f1b04f,#e68b20)"></span></div></div>
+          <div class="project"><div class="project-top"><b>SEO 内容增长</b><span>91%</span></div><p>15 项任务 · 进度良好</p><div class="track"><span style="width:91%;background:linear-gradient(90deg,#55c79a,#1aa471)"></span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="rightstack">
+      <div class="panel">
+        <div class="ptitle"><h2>风险与待处理</h2><a>查看全部</a></div>
+        <div class="focus">
+          <div class="focusrow"><span class="ico ir">!</span><div><b>产品上传任务已逾期</b><p>Bob · Alibaba 产品更新</p></div><span class="chip cred">2 天</span></div>
+          <div class="focusrow"><span class="ico io">⌛</span><div><b>Alice 尚未提交日报</b><p>工作日截止时间 18:00</p></div><span class="chip corange">提醒</span></div>
+          <div class="focusrow"><span class="ico ib">✓</span><div><b>落地页文案等待审核</b><p>Ethan · 已等待 18 小时</p></div><span class="chip cblue">审核</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle"><h2>今日日程</h2><a>打开日历</a></div>
+        <div class="agenda">
+          <div class="event"><span class="time">10:30</span><i class="eventbar"></i><div>运营周例会<small>会议室 A · 全体运营</small></div></div>
+          <div class="event"><span class="time">14:00</span><i class="eventbar" style="background:#7c5ce2"></i><div>产品页审核<small>线上会议 · Alice / Ethan</small></div></div>
+          <div class="event"><span class="time">16:30</span><i class="eventbar" style="background:#1ca477"></i><div>本周数据复盘<small>主管办公室 · 30 分钟</small></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="lower">
+    <div class="panel">
+      <div class="ptitle"><h2>重点工作项</h2><div class="tabs"><span class="tab active">全部</span><span class="tab">待审核</span><span class="tab">即将到期</span><span class="tab">已逾期</span></div></div>
+      <table class="table"><tr><th>任务</th><th>负责人</th><th>项目</th><th>状态</th><th>进度</th><th>截止</th></tr>
+      <tr><td><b>Butterfly Paper Cup 详情页布局</b></td><td><i class="avatar">A</i>Alice</td><td>网站产品页优化</td><td><span class="status">进行中</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:68%"></span></div>　68%</td><td>06-10</td></tr>
+      <tr><td><b>上传咖啡纸杯机产品资料</b></td><td><i class="avatar" style="background:#8262df">B</i>Bob</td><td>Alibaba 产品更新</td><td><span class="status" style="background:#ffeded;color:#d94b55">已逾期</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:82%;background:#e5575e"></span></div>　82%</td><td style="color:#dc4b57">06-04</td></tr>
+      <tr><td><b>竞品 SEO 关键词分析</b></td><td><i class="avatar" style="background:#20a178">E</i>Ethan</td><td>SEO 内容增长</td><td><span class="status" style="background:#fff4e6;color:#c57b18">待审核</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:100%;background:#20a178"></span></div>　100%</td><td>06-12</td></tr></table>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><h2>我的今日待办</h2><a>＋ 添加待办</a></div>
+      <div class="todo">
+        <div class="todo-row"><i class="check"></i><div><b>审核 Alibaba 产品资料</b><small>关联任务 · Bob</small></div><span class="chip cred">高</span></div>
+        <div class="todo-row"><i class="check"></i><div><b>确认下周内容排期</b><small>个人待办 · 15:00</small></div><span class="chip corange">中</span></div>
+        <div class="todo-row"><i class="check" style="background:#3478f6;border-color:#3478f6"></i><div style="opacity:.55"><b>回复客户页面修改意见</b><small>已完成 · 09:20</small></div><span class="chip cblue">完成</span></div>
+      </div>
+    </div>
+    <div class="query"><div><h3>快速查询整个团队的运营进度</h3><p>支持人员、日期、项目、任务、日报、会议和文件查询</p></div><div class="ask">例如：本周有哪些逾期任务和未处理审核？　　→</div></div>
+  </section>
+</main>
+</div>
+</body>
+</html>
