@@ -37,7 +37,6 @@
   <div id="toast-root"></div>
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const SUPABASE_URL = "https://yffvultlrhbckbitjbrm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_91NA7dKHOxJE15Fp_zihew_Oz8CiP-r";
@@ -252,8 +251,8 @@ function errorView(message) {
 }
 
 
-
-
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    
 const auth = createAuthService(supabase);
 const repository = createRepository(supabase);
 const root = document.querySelector("#app");
