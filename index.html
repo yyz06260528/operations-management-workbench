@@ -1,90 +1,571 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>运营管理工作台</title>
-<style>
-:root{--navy:#09192f;--blue:#3478f6;--ink:#172238;--muted:#7c899e;--line:#e6ebf2;--bg:#f3f6fa}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei",Inter,system-ui,sans-serif}.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}.sidebar{position:relative;background:linear-gradient(180deg,#0b1d36 0%,#09172b 100%);color:#fff;padding:26px 18px}.brand{display:flex;align-items:center;gap:11px;padding:0 8px 26px;font-size:17px;font-weight:700}.brandmark{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#68a7ff,#2873ee);display:grid;place-items:center;box-shadow:0 8px 20px #1764cf55}.label{font-size:10px;color:#57708f;letter-spacing:1.5px;padding:19px 13px 8px}.nav{display:grid;gap:5px}.navitem{padding:11px 13px;border-radius:9px;color:#a8bad0;font-size:12px}.navitem.active{background:linear-gradient(90deg,#3478f6,#2868d8);color:#fff;box-shadow:0 8px 20px #1764cf33}.badge{float:right;background:#ef5662;color:white;border-radius:10px;padding:1px 6px}.account{position:absolute;left:18px;right:18px;bottom:22px;padding:12px;border:1px solid #ffffff12;background:#ffffff08;border-radius:11px;font-size:11px;color:#91a8c2}.account b{display:block;color:#fff;margin-bottom:4px}.workspace{padding:0 28px 30px}.header{height:76px;display:flex;align-items:center;justify-content:space-between}.hello h1{font-size:21px;margin:0}.hello p{font-size:11px;color:var(--muted);margin:5px 0 0}.head-actions{display:flex;align-items:center;gap:9px}.search,.date{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:11px;color:#77859a}.search{width:205px}.primary{background:linear-gradient(135deg,#3c83fa,#286be1);color:#fff;border-radius:10px;padding:11px 15px;font-size:11px;box-shadow:0 8px 18px #3478f633}.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;min-height:112px;box-shadow:0 5px 18px #203b6808}.kpi-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#748298}.ico{width:31px;height:31px;border-radius:9px;display:grid;place-items:center}.ib{background:#edf4ff;color:#3478f6}.ig{background:#eaf9f3;color:#17a26b}.io{background:#fff4e6;color:#df8a16}.ir{background:#ffeded;color:#dc4b57}.ip{background:#f2edff;color:#7958de}.value{font-size:25px;font-weight:750;margin:8px 0 3px}.hint{font-size:9px;color:#8b97a8}.positive{color:#159d68}.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.72fr);gap:16px;margin-top:16px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 5px 18px #203b6808}.ptitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.ptitle h2{font-size:13px;margin:0}.ptitle a{font-size:9px;color:#3478f6}.overview{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.chart{height:184px;position:relative;border-bottom:1px solid #e8edf4;background:linear-gradient(180deg,#fff,#fbfdff)}.chart:before,.chart:after{content:"";position:absolute;left:0;right:0;border-top:1px dashed #e9edf3}.chart:before{top:55px}.chart:after{top:110px}.line{position:absolute;left:4%;right:4%;top:35px;height:115px}.line svg{width:100%;height:100%;overflow:visible}.legend{display:flex;gap:14px;margin-top:10px;font-size:9px;color:#8190a3}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.projects{display:grid;gap:10px}.project{padding:11px;border:1px solid #edf1f5;border-radius:10px}.project-top{display:flex;justify-content:space-between;font-size:10px}.project p{font-size:9px;color:#8995a6;margin:5px 0 9px}.track{height:5px;background:#edf1f5;border-radius:6px;overflow:hidden}.track span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#68a7ff,#3478f6)}.rightstack{display:grid;gap:16px}.focus{display:grid;gap:9px}.focusrow{display:grid;grid-template-columns:31px 1fr auto;gap:9px;align-items:center;padding:10px;border:1px solid #edf1f5;border-radius:10px}.focusrow b{font-size:10px}.focusrow p{font-size:9px;color:#8a96a6;margin:3px 0 0}.chip{font-size:8px;padding:4px 7px;border-radius:20px}.cred{background:#ffeded;color:#d94b55}.corange{background:#fff4e6;color:#c57b18}.cblue{background:#edf4ff;color:#3478f6}.agenda{display:grid;gap:8px}.event{display:grid;grid-template-columns:43px 3px 1fr;gap:9px;align-items:center}.time{font-size:9px;color:#76859a;text-align:right}.eventbar{height:36px;border-radius:4px;background:#3a7ff2}.event div:last-child{font-size:10px}.event small{display:block;color:#8a96a6;margin-top:3px}.lower{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:16px;margin-top:16px}.tabs{display:flex;gap:6px}.tab{font-size:8px;padding:6px 9px;background:#f4f6f9;color:#76849a;border-radius:7px}.tab.active{background:#edf4ff;color:#3478f6}.table{width:100%;border-collapse:collapse}.table th{font-size:8px;color:#8995a5;text-align:left;padding:9px 7px;border-bottom:1px solid #edf1f5}.table td{font-size:9px;padding:11px 7px;border-bottom:1px solid #f0f3f7}.avatar{width:23px;height:23px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;background:#5a8ce7;margin-right:6px}.status{padding:4px 7px;border-radius:15px;background:#edf4ff;color:#3478f6}.todo{display:grid;gap:8px}.todo-row{display:grid;grid-template-columns:17px 1fr auto;gap:8px;align-items:center;padding:9px;border:1px solid #edf1f5;border-radius:9px}.check{width:15px;height:15px;border:1px solid #ccd5e1;border-radius:4px}.todo-row b{font-size:9px}.todo-row small{display:block;color:#8b97a8;margin-top:3px}.query{grid-column:1/-1;background:linear-gradient(130deg,#102d56,#1769d2);color:white;border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 26px #174f9a2c}.query h3{font-size:12px;margin:0}.query p{font-size:9px;color:#bcd4f2;margin:5px 0 0}.ask{width:47%;background:#fff;color:#8190a3;padding:11px 13px;border-radius:9px;font-size:9px}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运营管理工作台</title>
+  <style>:root{--navy:#0a1b33;--navy2:#0e2747;--blue:#3278f5;--blue2:#245fd1;--ink:#162238;--muted:#7c899d;--line:#e5eaf1;--bg:#f3f6fa;--white:#fff;--red:#df4e5b;--green:#16a06b;--orange:#d88718;--purple:#7658dc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:14px}button,input,select,textarea{font:inherit}.app-shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:236px;background:linear-gradient(180deg,var(--navy),#071526);color:white;padding:25px 18px;overflow:auto}.brand{display:flex;align-items:center;gap:12px;padding:0 8px 27px;font-weight:700;font-size:17px}.brandmark{display:grid;place-items:center;width:37px;height:37px;border-radius:11px;background:linear-gradient(145deg,#68a9ff,#2871eb);box-shadow:0 9px 20px #1764cf55}.nav-label{padding:22px 13px 7px;color:#55708f;font-size:10px;letter-spacing:1.5px}.nav-item{display:flex;align-items:center;gap:11px;margin:4px 0;padding:11px 13px;border-radius:9px;color:#a9bbd0;text-decoration:none;font-size:12px;transition:.18s}.nav-item:hover{color:white;background:#ffffff0d}.nav-item.active{color:white;background:linear-gradient(90deg,var(--blue),var(--blue2));box-shadow:0 8px 20px #1764cf30}.nav-icon{width:16px;text-align:center}.nav-badge{margin-left:auto;background:#ee5662;color:white;border-radius:10px;padding:1px 6px;font-size:10px}.side-profile{margin-top:26px;padding:12px;border:1px solid #ffffff12;background:#ffffff08;border-radius:11px;color:#91a7c0;font-size:11px}.side-profile b{display:block;color:white;margin-bottom:4px}.main{grid-column:2;padding:0 28px 32px;min-width:0}.topbar{height:77px;display:flex;align-items:center;justify-content:space-between;gap:20px}.page-title h1{font-size:21px;margin:0}.page-title p{margin:5px 0 0;color:var(--muted);font-size:11px}.top-actions{display:flex;gap:9px;align-items:center}.searchbox,.control{border:1px solid var(--line);background:white;color:#718097;border-radius:10px;padding:10px 13px;font-size:11px}.searchbox{width:220px}.btn{border:0;border-radius:10px;padding:10px 15px;cursor:pointer;font-size:11px}.btn-primary{background:linear-gradient(135deg,#3e84fa,#286ade);color:white;box-shadow:0 8px 18px #3478f630}.btn-soft{background:#edf4ff;color:var(--blue)}.btn-danger{background:#ffeded;color:var(--red)}.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.card,.panel{background:white;border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px #203b6808}.kpi{padding:15px 16px;min-height:112px}.kpi-head{display:flex;justify-content:space-between;align-items:center;color:#748298;font-size:10px}.iconbox{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#edf4ff;color:var(--blue)}.iconbox.green{background:#eaf9f3;color:var(--green)}.iconbox.orange{background:#fff4e6;color:var(--orange)}.iconbox.red{background:#ffeded;color:var(--red)}.iconbox.purple{background:#f2edff;color:var(--purple)}.kpi-value{font-size:26px;font-weight:750;margin:8px 0 3px}.hint{font-size:9px;color:#8a96a7}.positive{color:var(--green)}.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(295px,.72fr);gap:16px;margin-top:16px}.panel{padding:17px}.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.panel-title h2{font-size:13px;margin:0}.text-link{font-size:9px;color:var(--blue);cursor:pointer}.overview-inner{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}.trend-chart{height:180px;border-bottom:1px solid #e8edf4;background:linear-gradient(#fff,#fbfdff);position:relative}.trend-chart svg{width:100%;height:100%}.legend{display:flex;gap:16px;margin-top:10px;color:#8190a3;font-size:9px}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.project-list,.stack,.todo-list{display:grid;gap:9px}.project-card,.risk-row,.todo-row,.event-row{border:1px solid #edf1f5;border-radius:10px;padding:10px}.project-head,.row-between{display:flex;justify-content:space-between;align-items:center}.project-card b,.risk-row b,.todo-row b{font-size:10px}.project-card p,.risk-row p,.todo-row small{margin:4px 0 8px;color:#8995a6;font-size:9px}.track{height:5px;background:#edf1f5;border-radius:6px;overflow:hidden}.track span{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#67a8ff,var(--blue))}.risk-row{display:grid;grid-template-columns:31px 1fr auto;gap:9px;align-items:center}.chip,.status{display:inline-block;padding:4px 7px;border-radius:20px;font-size:8px;background:#edf4ff;color:var(--blue)}.chip.red,.status.red{background:#ffeded;color:var(--red)}.chip.orange,.status.orange{background:#fff4e6;color:var(--orange)}.event-row{display:grid;grid-template-columns:42px 3px 1fr;gap:9px;align-items:center;border:0;padding:3px}.event-time{font-size:9px;color:#76859a;text-align:right}.event-line{height:36px;border-radius:4px}.event-title{font-size:10px}.event-title small{display:block;color:#8a96a6;margin-top:3px}.lower-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:16px;margin-top:16px}.data-table{width:100%;border-collapse:collapse}.data-table th{text-align:left;color:#8995a5;font-size:9px;padding:9px 8px;border-bottom:1px solid #edf1f5}.data-table td{font-size:10px;padding:11px 8px;border-bottom:1px solid #f0f3f7}.avatar{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;color:white;margin-right:6px;font-size:9px}.progress-cell{display:flex;align-items:center;gap:7px}.progress-cell .track{width:72px}.tabs{display:flex;gap:6px}.tab{border:0;padding:6px 9px;border-radius:7px;background:#f4f6f9;color:#76849a;font-size:8px;cursor:pointer}.tab.active{background:#edf4ff;color:var(--blue)}.todo-row{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center}.check{width:16px;height:16px;border:1px solid #ccd5e1;border-radius:4px;cursor:pointer}.check.done{background:var(--blue);border-color:var(--blue);box-shadow:inset 0 0 0 3px white}.done-text{opacity:.52;text-decoration:line-through}.query-banner{grid-column:1/-1;background:linear-gradient(130deg,#102d56,#1769d2);color:white;border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 12px 26px #174f9a2c}.query-banner h3{font-size:12px;margin:0}.query-banner p{font-size:9px;color:#bdd5f3;margin:5px 0 0}.query-form{display:flex;width:49%;gap:7px}.query-input{flex:1;border:0;border-radius:9px;padding:11px 13px;font-size:10px}.page-panel{margin-bottom:16px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:white;border-radius:9px;padding:8px 10px;color:#718097;font-size:10px}.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.entity-card{padding:16px}.entity-card h3{font-size:13px;margin:0 0 6px}.entity-card p{font-size:10px;color:#7c899d;line-height:1.6}.report-card{padding:15px;border-left:3px solid var(--blue)}.report-section{margin-top:10px}.report-section b{font-size:10px}.report-section p{font-size:10px;color:#6f7d91;margin:4px 0}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}.day{min-height:105px;border:1px solid var(--line);border-radius:10px;padding:8px;background:white;font-size:10px}.day.muted{opacity:.45}.day.today{border-color:var(--blue);box-shadow:0 0 0 2px #3478f61a}.calendar-event{margin-top:7px;padding:5px;border-radius:6px;background:#edf4ff;color:var(--blue);font-size:8px}.empty{padding:50px;text-align:center;color:#8995a6}.modal-backdrop{position:fixed;inset:0;background:#08142799;display:grid;place-items:center;z-index:20}.modal{width:min(520px,90vw);background:white;border-radius:16px;padding:22px;box-shadow:0 24px 80px #0003}.modal h2{margin:0 0 18px;font-size:17px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:10px;color:#657389}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:11px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.toast{position:fixed;right:24px;bottom:24px;background:#132a49;color:white;border-radius:10px;padding:12px 16px;box-shadow:0 12px 35px #10233d44;font-size:11px;z-index:30}.query-result{margin-top:12px;padding:13px;border-radius:10px;background:#f5f8fc}.query-result h4{margin:0 0 8px;font-size:11px}.query-result li{margin:5px 0;color:#657389;font-size:10px}.file-icon{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#edf4ff;color:var(--blue);margin-right:8px}.mobile-menu{display:none}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.overview-inner{grid-template-columns:1fr}.cards-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:820px){.app-shell{display:block}.sidebar{transform:translateX(-100%);z-index:15;transition:.2s}.sidebar.open{transform:none}.main{padding:0 16px}.mobile-menu{display:block}.top-actions .searchbox{display:none}.kpi-grid{grid-template-columns:repeat(2,1fr)}.dashboard-grid,.lower-grid{grid-template-columns:1fr}.query-form{width:100%}.query-banner{align-items:flex-start;gap:12px;flex-direction:column}.cards-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+@media print{.sidebar,.top-actions,.toolbar,.query-banner{display:none!important}.app-shell{display:block}.main{padding:0}.panel,.card{box-shadow:none}.main{grid-column:auto}}
+
+.auth-page{min-height:100vh;display:grid;grid-template-columns:minmax(420px,.82fr) 1.18fr;background:#f5f7fb}
+.auth-card{width:min(460px,calc(100% - 48px));margin:auto;padding:42px;background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px #203b6817}
+.auth-brand{display:flex;align-items:center;gap:12px;font-weight:750;font-size:18px;margin-bottom:52px}
+.eyebrow{margin:0 0 12px;color:var(--blue);font-size:10px;font-weight:700;letter-spacing:2px}
+.auth-card h1{margin:0;font-size:32px;letter-spacing:-1px}.auth-copy{margin:12px 0 28px;color:var(--muted);line-height:1.7}
+.auth-form{display:grid;gap:17px}.auth-form label{display:grid;gap:8px;color:#4d5d72;font-size:12px;font-weight:650}
+.auth-form input{border:1px solid #dfe5ed;border-radius:11px;padding:13px 14px;outline:none;transition:.18s}.auth-form input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #3478f615}
+.auth-submit{margin-top:5px;padding:13px;font-size:13px}.auth-note{margin:22px 0 0;color:#98a3b2;font-size:10px;text-align:center}
+.auth-error{margin-bottom:18px;padding:11px 13px;border-radius:10px;background:#ffeded;color:var(--red);font-size:11px}
+.auth-visual{position:relative;display:flex;align-items:flex-end;overflow:hidden;padding:68px;background:linear-gradient(145deg,#071526,#103866 55%,#246fde);color:#fff}
+.auth-visual:before,.auth-visual:after{content:"";position:absolute;border-radius:50%;border:1px solid #ffffff18}
+.auth-visual:before{width:620px;height:620px;right:-170px;top:-190px}.auth-visual:after{width:360px;height:360px;right:80px;top:60px}
+.auth-visual-content{position:relative;z-index:1;max-width:620px}.auth-visual h2{font-size:44px;line-height:1.15;letter-spacing:-1.7px;margin:22px 0 14px}.auth-visual p{color:#bed2ea;font-size:15px}
+.live-dot{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:20px;background:#ffffff12;border:1px solid #ffffff1c;font-size:10px}.live-dot:before{content:"";width:7px;height:7px;border-radius:50%;background:#45d79e;box-shadow:0 0 0 4px #45d79e20}
+.auth-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:38px}.auth-stats div{padding:16px;border:1px solid #ffffff16;border-radius:13px;background:#ffffff0b}.auth-stats b{display:block;font-size:24px}.auth-stats span{display:block;margin-top:4px;color:#b9cde5;font-size:9px}
+.state-page{min-height:100vh;display:grid;place-content:center;justify-items:center;text-align:center;background:#f5f7fb}.state-page h2{margin:18px 0 6px}.state-page p{color:var(--muted);margin:0 0 20px}
+.loader{width:36px;height:36px;border:3px solid #dce7f6;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}.state-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#ffeded;color:var(--red);font-size:24px;font-weight:750}
+@keyframes spin{to{transform:rotate(360deg)}}.side-logout{display:block;width:100%;margin-top:12px;padding:8px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff08;color:#c4d1df;cursor:pointer;font-size:10px}
+.table-wrap{overflow:auto}.cell-note{display:block;margin-top:4px;color:var(--muted)}.toast-error{background:#9f2632}.check{background:#fff;padding:0}.check.done:after{content:"✓";color:#fff;font-size:10px}
+@media(max-width:850px){.auth-page{grid-template-columns:1fr}.auth-visual{display:none}.auth-card{padding:30px}.auth-brand{margin-bottom:38px}.auth-card h1{font-size:27px}}
 </style>
 </head>
 <body>
-<div class="app">
-<aside class="sidebar">
-  <div class="brand"><span class="brandmark">O</span>运营管理工作台</div>
-  <div class="nav">
-    <div class="navitem active">▦　运营总览</div><div class="navitem">✓　任务管理</div><div class="navitem">◇　项目管理</div><div class="navitem">▤　工作日报</div><div class="navitem">☑　今日待办</div>
-    <div class="label">协作管理</div><div class="navitem">□　日历与会议</div><div class="navitem">◎　审核反馈 <span class="badge">4</span></div><div class="navitem">♙　团队成员</div><div class="navitem">▱　文件归档</div>
-    <div class="label">数据与系统</div><div class="navitem">♢　提醒中心 <span class="badge">5</span></div><div class="navitem">▥　数据报表</div><div class="navitem">⚙　系统设置</div>
-  </div>
-  <div class="account"><b>管理员 · 运营主管</b>今日团队在线 8 / 9</div>
-</aside>
-<main class="workspace">
-  <header class="header">
-    <div class="hello"><h1>运营指挥中心</h1><p>2026 年 6 月 6 日 · 实时掌握团队、项目与重要日程</p></div>
-    <div class="head-actions"><div class="search">⌕　搜索任务、项目、成员或文件</div><div class="date">本周⌄</div><div class="primary">＋ 新建工作项</div></div>
-  </header>
-  <section class="kpis">
-    <div class="kpi"><div class="kpi-top">进行中任务 <span class="ico ib">✓</span></div><div class="value">18</div><div class="hint"><span class="positive">↑ 12%</span> 较上周</div></div>
-    <div class="kpi"><div class="kpi-top">本周完成率 <span class="ico ig">↗</span></div><div class="value">76%</div><div class="hint">24 / 32 项已完成</div></div>
-    <div class="kpi"><div class="kpi-top">待审核事项 <span class="ico io">⌛</span></div><div class="value">4</div><div class="hint">最长等待 18 小时</div></div>
-    <div class="kpi"><div class="kpi-top">异常与逾期 <span class="ico ir">!</span></div><div class="value">3</div><div class="hint">2 项逾期 · 1 人缺日报</div></div>
-    <div class="kpi"><div class="kpi-top">今日会议 <span class="ico ip">□</span></div><div class="value">3</div><div class="hint">下一场 10:30 开始</div></div>
-  </section>
-  <section class="grid">
-    <div class="panel">
-      <div class="ptitle"><h2>运营健康趋势</h2><a>查看分析报告 →</a></div>
-      <div class="overview">
+  <div id="app"></div>
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const SUPABASE_URL = "https://yffvultlrhbckbitjbrm.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_91NA7dKHOxJE15Fp_zihew_Oz8CiP-r";
+
+
+
+const USER_COLORS = ["#3478f6", "#7658dc", "#16a06b", "#df4e5b"];
+
+function mapProfile(row, index = 0) {
+  return {
+    id: row.id,
+    name: row.name || "未命名成员",
+    role: row.role || "member",
+    department: row.department || "",
+    active: row.active !== false,
+    workdays: row.workdays || [1, 2, 3, 4, 5],
+    color: USER_COLORS[index % USER_COLORS.length]
+  };
+}
+
+function mapProject(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    ownerId: row.owner_id || null,
+    owner: "",
+    progress: row.progress || 0,
+    status: row.status || "planning",
+    dueDate: row.due_date || "",
+    tasks: 0,
+    overdue: 0
+  };
+}
+
+function mapTask(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    assigneeId: row.assignee_id,
+    projectId: row.project_id,
+    createdBy: row.created_by,
+    priority: row.priority || "medium",
+    status: row.status || "pending",
+    progress: row.progress || 0,
+    dueDate: row.due_date,
+    latest: row.latest_update || ""
+  };
+}
+
+function mapTodo(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    title: row.title,
+    meta: row.note || "",
+    priority: row.priority || "medium",
+    completedAt: row.completed_at || null,
+    done: Boolean(row.completed_at)
+  };
+}
+
+
+function getLoginErrorMessage(error) {
+  const message = error?.message || "";
+  if (/invalid login credentials/i.test(message)) return "邮箱或密码不正确";
+  if (/email not confirmed/i.test(message)) return "邮箱尚未确认";
+  return "登录失败，请稍后重试";
+}
+
+function createAuthService(supabase) {
+  return {
+    async getSession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      return data.session;
+    },
+    async signIn(email, password) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(getLoginErrorMessage(error));
+      return data;
+    },
+    async signOut() {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    }
+  };
+}
+
+
+
+
+function throwIfError(result) {
+  if (result.error) throw result.error;
+  return result.data;
+}
+
+function createRepository(supabase) {
+  return {
+    async loadWorkbenchData() {
+      const [profiles, projects, tasks, todos] = await Promise.all([
+        supabase.from("profiles").select("*"),
+        supabase.from("projects").select("*"),
+        supabase.from("tasks").select("*"),
+        supabase.from("todos").select("*")
+      ]);
+
+      return {
+        users: throwIfError(profiles).map(mapProfile),
+        projects: throwIfError(projects).map(mapProject),
+        tasks: throwIfError(tasks).map(mapTask),
+        todos: throwIfError(todos).map(mapTodo),
+        reports: [],
+        events: [],
+        files: []
+      };
+    },
+    async createTask(task) {
+      return throwIfError(
+        await supabase
+          .from("tasks")
+          .insert({
+            title: task.title,
+            assignee_id: task.assigneeId,
+            project_id: task.projectId || null,
+            priority: task.priority || "medium",
+            due_date: task.dueDate,
+            created_by: task.createdBy,
+            status: "pending",
+            progress: 0
+          })
+          .select()
+          .single()
+      );
+    },
+    async updateTask(id, values) {
+      return throwIfError(
+        await supabase
+          .from("tasks")
+          .update({
+            status: values.status,
+            progress: values.progress,
+            latest_update: values.latest
+          })
+          .eq("id", id)
+      );
+    },
+    async createTodo(todo) {
+      return throwIfError(
+        await supabase
+          .from("todos")
+          .insert({
+            user_id: todo.userId,
+            title: todo.title,
+            note: todo.note || "",
+            priority: todo.priority || "medium"
+          })
+          .select()
+          .single()
+      );
+    },
+    async setTodoDone(id, done) {
+      return throwIfError(
+        await supabase
+          .from("todos")
+          .update({ completed_at: done ? new Date().toISOString() : null })
+          .eq("id", id)
+      );
+    }
+  };
+}
+
+
+function loginView(message = "") {
+  return `
+    <main class="auth-page">
+      <section class="auth-card">
+        <div class="auth-brand"><span class="brandmark">O</span>运营管理工作台</div>
         <div>
-          <div class="chart"><div class="line"><svg viewBox="0 0 600 120" preserveAspectRatio="none"><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3478f6" stop-opacity=".26"/><stop offset="1" stop-color="#3478f6" stop-opacity="0"/></linearGradient></defs><path d="M0 95 C60 80 75 65 125 72 S220 45 280 58 S370 22 430 35 S520 18 600 8 L600 120 L0 120Z" fill="url(#fill)"/><path d="M0 95 C60 80 75 65 125 72 S220 45 280 58 S370 22 430 35 S520 18 600 8" fill="none" stroke="#3478f6" stroke-width="3"/><path d="M0 105 C90 98 130 92 180 96 S290 80 355 85 S480 65 600 70" fill="none" stroke="#9eb9df" stroke-width="2" stroke-dasharray="6 6"/></svg></div></div>
-          <div class="legend"><span><i style="background:#3478f6"></i>任务完成率</span><span><i style="background:#9eb9df"></i>日报提交率</span></div>
+          <p class="eyebrow">OPERATIONS WORKBENCH</p>
+          <h1>登录工作台</h1>
+          <p class="auth-copy">使用管理员分配的邮箱和密码登录。</p>
         </div>
-        <div class="projects">
-          <div class="project"><div class="project-top"><b>网站产品页优化</b><span>82%</span></div><p>12 项任务 · 2 项待审核</p><div class="track"><span style="width:82%"></span></div></div>
-          <div class="project"><div class="project-top"><b>Alibaba 产品更新</b><span>64%</span></div><p>8 项任务 · 1 项逾期</p><div class="track"><span style="width:64%;background:linear-gradient(90deg,#f1b04f,#e68b20)"></span></div></div>
-          <div class="project"><div class="project-top"><b>SEO 内容增长</b><span>91%</span></div><p>15 项任务 · 进度良好</p><div class="track"><span style="width:91%;background:linear-gradient(90deg,#55c79a,#1aa471)"></span></div></div>
+        ${message ? `<div class="auth-error">${message}</div>` : ""}
+        <form class="auth-form" data-action="login">
+          <label>邮箱<input name="email" type="email" autocomplete="email" required placeholder="name@company.com"></label>
+          <label>密码<input name="password" type="password" autocomplete="current-password" required placeholder="请输入密码"></label>
+          <button class="btn btn-primary auth-submit">登录</button>
+        </form>
+        <p class="auth-note">账号由管理员统一创建。如无法登录，请联系管理员。</p>
+      </section>
+      <aside class="auth-visual">
+        <div class="auth-visual-content">
+          <span class="live-dot">已连接 Supabase</span>
+          <h2>任务、项目和团队进度集中管理</h2>
+          <p>权限隔离、真实数据、私有附件存储。</p>
+          <div class="auth-stats">
+            <div><b>10</b><span>核心数据表</span></div>
+            <div><b>21</b><span>业务权限规则</span></div>
+            <div><b>4</b><span>附件权限规则</span></div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="rightstack">
-      <div class="panel">
-        <div class="ptitle"><h2>风险与待处理</h2><a>查看全部</a></div>
-        <div class="focus">
-          <div class="focusrow"><span class="ico ir">!</span><div><b>产品上传任务已逾期</b><p>Bob · Alibaba 产品更新</p></div><span class="chip cred">2 天</span></div>
-          <div class="focusrow"><span class="ico io">⌛</span><div><b>Alice 尚未提交日报</b><p>工作日截止时间 18:00</p></div><span class="chip corange">提醒</span></div>
-          <div class="focusrow"><span class="ico ib">✓</span><div><b>落地页文案等待审核</b><p>Ethan · 已等待 18 小时</p></div><span class="chip cblue">审核</span></div>
+      </aside>
+    </main>`;
+}
+
+function loadingView(text = "正在加载工作台") {
+  return `<main class="state-page"><div class="loader"></div><h2>${text}</h2><p>正在安全读取你的工作数据。</p></main>`;
+}
+
+function errorView(message) {
+  return `<main class="state-page"><div class="state-icon">!</div><h2>无法打开工作台</h2><p>${message}</p><button class="btn btn-primary" data-action="retry">重新加载</button></main>`;
+}
+
+
+
+
+const auth = createAuthService(supabase);
+const repository = createRepository(supabase);
+const root = document.querySelector("#app");
+
+const state = {
+  session: null,
+  profile: null,
+  data: null,
+  route: location.hash.slice(1) || "dashboard"
+};
+
+const routeLabels = {
+  dashboard: ["运营总览", "团队任务和项目进度"],
+  tasks: ["任务管理", "分配、跟踪和审核任务"],
+  projects: ["项目管理", "查看项目健康度和整体进展"],
+  todos: ["今日待办", "管理个人轻量事项"],
+  team: ["团队成员", "查看成员角色和部门"],
+  settings: ["系统设置", "账号、权限和云端连接"]
+};
+
+async function start() {
+  root.innerHTML = loadingView();
+  try {
+    state.session = await auth.getSession();
+    if (!state.session) return renderLogin();
+    await loadWorkbench();
+  } catch (error) {
+    root.innerHTML = errorView(error.message || "连接失败，请稍后重试");
+  }
+}
+
+async function loadWorkbench() {
+  root.innerHTML = loadingView("正在同步真实数据");
+  state.data = await repository.loadWorkbenchData();
+  state.profile = state.data.users.find((user) => user.id === state.session.user.id);
+  if (!state.profile) throw new Error("当前账号尚未建立成员档案，请联系管理员。");
+  enrichProjects();
+  renderApp();
+}
+
+function enrichProjects() {
+  for (const project of state.data.projects) {
+    const tasks = state.data.tasks.filter((task) => task.projectId === project.id);
+    project.tasks = tasks.length;
+    project.overdue = tasks.filter((task) => isOverdue(task)).length;
+    project.owner = userName(project.ownerId);
+  }
+}
+
+function renderLogin(message = "") {
+  root.innerHTML = loginView(escapeHtml(message));
+}
+
+function renderApp() {
+  const [title, subtitle] = routeLabels[state.route] || routeLabels.dashboard;
+  root.innerHTML = `
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand"><span class="brandmark">O</span>运营管理工作台</div>
+        <div class="nav-label">运营管理</div>
+        ${navItem("dashboard", "总", "运营总览")}
+        ${navItem("tasks", "任", "任务管理")}
+        ${navItem("projects", "项", "项目管理")}
+        ${navItem("todos", "待", "今日待办")}
+        <div class="nav-label">系统</div>
+        ${navItem("team", "员", "团队成员")}
+        ${navItem("settings", "设", "系统设置")}
+        <div class="side-profile">
+          <b>${escapeHtml(state.profile.name)}</b>
+          ${state.profile.role === "manager" ? "管理员" : "成员"} · ${escapeHtml(state.profile.department || "未设置部门")}
+          <button class="side-logout" data-action="logout">退出登录</button>
         </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <div class="page-title">
+            <h1><button class="btn mobile-menu" data-action="menu">菜单</button>${title}</h1>
+            <p>${subtitle} · ${new Date().toLocaleDateString("zh-CN")}</p>
+          </div>
+          ${state.profile.role === "manager" && state.route === "tasks"
+            ? '<button class="btn btn-primary" data-action="new-task">+ 新建任务</button>'
+            : ""}
+        </header>
+        <div id="page">${renderRoute()}</div>
+      </main>
+    </div>`;
+}
+
+function navItem(route, icon, text) {
+  return `<a class="nav-item ${state.route === route ? "active" : ""}" href="#${route}">
+    <span class="nav-icon">${icon}</span>${text}
+  </a>`;
+}
+
+function renderRoute() {
+  if (state.route === "tasks") return tasksView();
+  if (state.route === "projects") return projectsView();
+  if (state.route === "todos") return todosView();
+  if (state.route === "team") return teamView();
+  if (state.route === "settings") return settingsView();
+  return dashboardView();
+}
+
+function dashboardView() {
+  const { tasks, projects, todos } = state.data;
+  const active = tasks.filter((task) => task.status === "in_progress").length;
+  const completed = tasks.filter((task) => task.status === "completed").length;
+  const review = tasks.filter((task) => task.status === "waiting_review").length;
+  const overdue = tasks.filter(isOverdue).length;
+  return `
+    <section class="kpi-grid">
+      ${kpi("进行中任务", active, "当前正在推进")}
+      ${kpi("已完成任务", completed, "来自真实数据库", "green")}
+      ${kpi("待审核事项", review, "需要管理员处理", "orange")}
+      ${kpi("逾期任务", overdue, "建议优先处理", "red")}
+      ${kpi("今日待办", todos.filter((todo) => !todo.done).length, "个人事项")}
+    </section>
+    <section class="dashboard-grid">
+      <div class="panel">${panelTitle("重点任务", "实时同步")}${tasks.length ? taskTable(tasks.slice(0, 6)) : empty("暂无任务")}</div>
+      <div class="panel">${panelTitle("项目进度", `${projects.length} 个项目`)}
+        <div class="project-list">${projects.map(projectCard).join("") || empty("暂无项目")}</div>
       </div>
-      <div class="panel">
-        <div class="ptitle"><h2>今日日程</h2><a>打开日历</a></div>
-        <div class="agenda">
-          <div class="event"><span class="time">10:30</span><i class="eventbar"></i><div>运营周例会<small>会议室 A · 全体运营</small></div></div>
-          <div class="event"><span class="time">14:00</span><i class="eventbar" style="background:#7c5ce2"></i><div>产品页审核<small>线上会议 · Alice / Ethan</small></div></div>
-          <div class="event"><span class="time">16:30</span><i class="eventbar" style="background:#1ca477"></i><div>本周数据复盘<small>主管办公室 · 30 分钟</small></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="lower">
-    <div class="panel">
-      <div class="ptitle"><h2>重点工作项</h2><div class="tabs"><span class="tab active">全部</span><span class="tab">待审核</span><span class="tab">即将到期</span><span class="tab">已逾期</span></div></div>
-      <table class="table"><tr><th>任务</th><th>负责人</th><th>项目</th><th>状态</th><th>进度</th><th>截止</th></tr>
-      <tr><td><b>Butterfly Paper Cup 详情页布局</b></td><td><i class="avatar">A</i>Alice</td><td>网站产品页优化</td><td><span class="status">进行中</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:68%"></span></div>　68%</td><td>06-10</td></tr>
-      <tr><td><b>上传咖啡纸杯机产品资料</b></td><td><i class="avatar" style="background:#8262df">B</i>Bob</td><td>Alibaba 产品更新</td><td><span class="status" style="background:#ffeded;color:#d94b55">已逾期</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:82%;background:#e5575e"></span></div>　82%</td><td style="color:#dc4b57">06-04</td></tr>
-      <tr><td><b>竞品 SEO 关键词分析</b></td><td><i class="avatar" style="background:#20a178">E</i>Ethan</td><td>SEO 内容增长</td><td><span class="status" style="background:#fff4e6;color:#c57b18">待审核</span></td><td><div class="track" style="width:70px;display:inline-block"><span style="width:100%;background:#20a178"></span></div>　100%</td><td>06-12</td></tr></table>
-    </div>
-    <div class="panel">
-      <div class="ptitle"><h2>我的今日待办</h2><a>＋ 添加待办</a></div>
-      <div class="todo">
-        <div class="todo-row"><i class="check"></i><div><b>审核 Alibaba 产品资料</b><small>关联任务 · Bob</small></div><span class="chip cred">高</span></div>
-        <div class="todo-row"><i class="check"></i><div><b>确认下周内容排期</b><small>个人待办 · 15:00</small></div><span class="chip corange">中</span></div>
-        <div class="todo-row"><i class="check" style="background:#3478f6;border-color:#3478f6"></i><div style="opacity:.55"><b>回复客户页面修改意见</b><small>已完成 · 09:20</small></div><span class="chip cblue">完成</span></div>
-      </div>
-    </div>
-    <div class="query"><div><h3>快速查询整个团队的运营进度</h3><p>支持人员、日期、项目、任务、日报、会议和文件查询</p></div><div class="ask">例如：本周有哪些逾期任务和未处理审核？　　→</div></div>
-  </section>
-</main>
-</div>
+    </section>`;
+}
+
+function tasksView() {
+  return `<div class="panel page-panel">${state.data.tasks.length ? taskTable(state.data.tasks) : empty("暂无可见任务")}</div>`;
+}
+
+function projectsView() {
+  const cards = state.data.projects.map((project) => `
+    <article class="panel entity-card">
+      <div class="row-between"><h3>${escapeHtml(project.name)}</h3><span class="status">${statusText(project.status)}</span></div>
+      <p>负责人：${escapeHtml(project.owner || "未分配")}<br>${project.tasks} 项任务 · ${project.overdue} 项逾期</p>
+      <div class="row-between"><b>${project.progress}%</b><span class="hint">${project.dueDate || "未设置日期"}</span></div>
+      <div class="track"><span style="width:${project.progress}%"></span></div>
+    </article>`).join("");
+  return `<div class="cards-grid">${cards || empty("暂无项目")}</div>`;
+}
+
+function todosView() {
+  const rows = state.data.todos.map((todo) => `
+    <div class="todo-row">
+      <button class="check ${todo.done ? "done" : ""}" data-action="toggle-todo" data-id="${todo.id}" aria-label="切换完成状态"></button>
+      <div class="${todo.done ? "done-text" : ""}"><b>${escapeHtml(todo.title)}</b><small>${escapeHtml(todo.meta)}</small></div>
+      <span class="chip">${priorityText(todo.priority)}</span>
+    </div>`).join("");
+  return `<div class="toolbar"><span></span><button class="btn btn-primary" data-action="add-todo">+ 添加待办</button></div>
+    <div class="panel"><div class="todo-list">${rows || empty("暂无待办")}</div></div>`;
+}
+
+function teamView() {
+  return `<div class="cards-grid">${state.data.users.map((user) => `
+    <article class="panel entity-card">
+      <div class="row-between"><h3><span class="avatar" style="background:${user.color}">${escapeHtml(user.name[0] || "?")}</span>${escapeHtml(user.name)}</h3><span class="status">${user.active ? "启用" : "停用"}</span></div>
+      <p>${user.role === "manager" ? "管理员" : "成员"}<br>${escapeHtml(user.department || "未设置部门")}</p>
+    </article>`).join("")}</div>`;
+}
+
+function settingsView() {
+  return `<div class="cards-grid">
+    <article class="panel entity-card"><h3>Supabase 连接</h3><p>已连接真实数据库<br>项目：yffvultlrhbckbitjbrm</p><span class="status">连接正常</span></article>
+    <article class="panel entity-card"><h3>当前权限</h3><p>${state.profile.role === "manager" ? "可管理全部任务和成员数据" : "仅可访问分配给自己的数据"}</p></article>
+    <article class="panel entity-card"><h3>附件存储</h3><p>私有存储区：workbench-files</p><span class="status">私有</span></article>
+  </div>`;
+}
+
+function taskTable(tasks) {
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>任务</th><th>负责人</th><th>项目</th><th>状态</th><th>进度</th><th>截止</th>${state.profile.role === "manager" ? "<th>操作</th>" : ""}</tr></thead>
+    <tbody>${tasks.map((task) => `<tr>
+      <td><b>${escapeHtml(task.title)}</b><small class="cell-note">${escapeHtml(task.latest)}</small></td>
+      <td>${escapeHtml(userName(task.assigneeId))}</td>
+      <td>${escapeHtml(projectName(task.projectId))}</td>
+      <td><span class="status ${isOverdue(task) ? "red" : ""}">${statusText(task.status)}</span></td>
+      <td>${task.progress}%</td><td>${task.dueDate || "-"}</td>
+      ${state.profile.role === "manager" ? `<td>${task.status === "waiting_review" ? `<button class="btn btn-soft" data-action="approve" data-id="${task.id}">通过</button>` : ""}</td>` : ""}
+    </tr>`).join("")}</tbody></table></div>`;
+}
+
+function projectCard(project) {
+  return `<div class="project-card"><div class="project-head"><b>${escapeHtml(project.name)}</b><span>${project.progress}%</span></div><p>${statusText(project.status)}</p><div class="track"><span style="width:${project.progress}%"></span></div></div>`;
+}
+
+function openTaskModal() {
+  modal(`<h2>新建任务</h2><form data-action="save-task"><div class="form-grid">
+    <label class="field full">任务名称<input name="title" required></label>
+    <label class="field">负责人<select name="assigneeId">${state.data.users.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`).join("")}</select></label>
+    <label class="field">所属项目<select name="projectId"><option value="">无项目</option>${state.data.projects.map((project) => `<option value="${project.id}">${escapeHtml(project.name)}</option>`).join("")}</select></label>
+    <label class="field">优先级<select name="priority"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></label>
+    <label class="field">截止日期<input name="dueDate" type="date" required></label>
+    </div><div class="modal-actions"><button type="button" class="btn" data-action="close-modal">取消</button><button class="btn btn-primary">创建任务</button></div></form>`);
+}
+
+function openTodoModal() {
+  modal(`<h2>添加待办</h2><form data-action="save-todo"><div class="form-grid">
+    <label class="field full">待办内容<input name="title" required></label>
+    <label class="field full">说明<input name="note"></label>
+    <label class="field">优先级<select name="priority"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></label>
+    </div><div class="modal-actions"><button type="button" class="btn" data-action="close-modal">取消</button><button class="btn btn-primary">添加</button></div></form>`);
+}
+
+async function withWrite(action, successMessage) {
+  try {
+    await action();
+    await loadWorkbench();
+    toast(successMessage);
+  } catch (error) {
+    renderApp();
+    toast(error.message || "操作失败，请重试", true);
+  }
+}
+
+window.addEventListener("hashchange", () => {
+  state.route = location.hash.slice(1) || "dashboard";
+  if (state.data) renderApp();
+});
+
+document.addEventListener("click", async (event) => {
+  const target = event.target.closest("[data-action]");
+  if (!target) return;
+  const action = target.dataset.action;
+  if (action === "menu") document.querySelector("#sidebar")?.classList.toggle("open");
+  if (action === "retry") start();
+  if (action === "logout") {
+    await auth.signOut();
+    state.session = null;
+    state.profile = null;
+    state.data = null;
+    renderLogin();
+  }
+  if (action === "new-task") openTaskModal();
+  if (action === "add-todo") openTodoModal();
+  if (action === "close-modal") closeModal();
+  if (action === "approve") {
+    await withWrite(
+      () => repository.updateTask(target.dataset.id, { status: "completed", progress: 100, latest: "管理员审核通过" }),
+      "任务已审核通过"
+    );
+  }
+  if (action === "toggle-todo") {
+    const todo = state.data.todos.find((item) => item.id === target.dataset.id);
+    await withWrite(() => repository.setTodoDone(todo.id, !todo.done), "待办状态已更新");
+  }
+});
+
+document.addEventListener("submit", async (event) => {
+  const action = event.target.dataset.action;
+  if (!action) return;
+  event.preventDefault();
+  const values = Object.fromEntries(new FormData(event.target));
+  if (action === "login") {
+    root.innerHTML = loadingView("正在登录");
+    try {
+      await auth.signIn(values.email, values.password);
+      state.session = await auth.getSession();
+      await loadWorkbench();
+    } catch (error) {
+      renderLogin(error.message);
+    }
+  }
+  if (action === "save-task") {
+    closeModal();
+    await withWrite(() => repository.createTask({ ...values, createdBy: state.profile.id }), "任务已创建");
+  }
+  if (action === "save-todo") {
+    closeModal();
+    await withWrite(() => repository.createTodo({ ...values, userId: state.profile.id }), "待办已添加");
+  }
+});
+
+function modal(content) {
+  document.querySelector("#modal-root").innerHTML = `<div class="modal-backdrop"><div class="modal">${content}</div></div>`;
+}
+function closeModal() {
+  document.querySelector("#modal-root").innerHTML = "";
+}
+function toast(message, error = false) {
+  const toastRoot = document.querySelector("#toast-root");
+  toastRoot.innerHTML = `<div class="toast ${error ? "toast-error" : ""}">${escapeHtml(message)}</div>`;
+  setTimeout(() => { toastRoot.innerHTML = ""; }, 2500);
+}
+function kpi(title, value, hint, color = "") {
+  return `<div class="card kpi"><div class="kpi-head">${title}<span class="iconbox ${color}">${value}</span></div><div class="kpi-value">${value}</div><div class="hint">${hint}</div></div>`;
+}
+function panelTitle(title, action) {
+  return `<div class="panel-title"><h2>${title}</h2><span class="text-link">${action}</span></div>`;
+}
+function empty(text) {
+  return `<div class="empty">${text}</div>`;
+}
+function isOverdue(task) {
+  return task.status !== "completed" && task.status !== "cancelled" && task.dueDate < new Date().toISOString().slice(0, 10);
+}
+function statusText(status) {
+  return ({ pending: "待处理", in_progress: "进行中", waiting_review: "待审核", completed: "已完成", cancelled: "已取消", planning: "规划中" })[status] || status || "未知";
+}
+function priorityText(priority) {
+  return ({ high: "高", medium: "中", low: "低" })[priority] || priority;
+}
+function userName(id) {
+  return state.data.users.find((user) => user.id === id)?.name || "未分配";
+}
+function projectName(id) {
+  return state.data.projects.find((project) => project.id === id)?.name || "未归类";
+}
+function escapeHtml(value = "") {
+  const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+  return String(value).replace(/[&<>"']/g, (character) => map[character]);
+}
+
+start();
+
+  </script>
 </body>
 </html>
