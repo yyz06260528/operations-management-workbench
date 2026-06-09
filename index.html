@@ -28,7 +28,9 @@
 .loader{width:36px;height:36px;border:3px solid #dce7f6;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}.state-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#ffeded;color:var(--red);font-size:24px;font-weight:750}
 @keyframes spin{to{transform:rotate(360deg)}}.side-logout{display:block;width:100%;margin-top:12px;padding:8px;border:1px solid #ffffff1a;border-radius:8px;background:#ffffff08;color:#c4d1df;cursor:pointer;font-size:10px}
 .table-wrap{overflow:auto}.cell-note{display:block;margin-top:4px;color:var(--muted)}.toast-error{background:#9f2632}.check{background:#fff;padding:0}.check.done:after{content:"✓";color:#fff;font-size:10px}
+.clickable-card{cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}.clickable-card:hover,.clickable-card:focus{transform:translateY(-2px);border-color:#cbdcf8;box-shadow:0 12px 28px #203b6814;outline:none}.dashboard-todos{grid-column:1/-1}.todo-list{gap:12px}.todo-card{border:1px solid #e8edf4;border-radius:13px;background:#fff;overflow:hidden}.todo-main{display:grid;grid-template-columns:18px minmax(0,1fr);gap:11px;padding:14px 15px;align-items:start}.todo-content{min-width:0}.todo-content p{margin:6px 0;color:#748298;font-size:10px;line-height:1.6}.todo-meta{display:flex;gap:8px 16px;flex-wrap:wrap;margin-top:8px;color:#8491a4;font-size:9px}.check.read-only{cursor:default}.attachment-section{padding:12px 15px 14px;border-top:1px solid #edf1f5;background:#fbfcfe}.attachment-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:10px}.attachment-title span,.attachment-note,.attachment-empty{color:#8a96a7;font-size:9px}.attachment-list{list-style:none;margin:0;padding:0;display:grid;gap:7px}.attachment-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 9px;border:1px solid #e8edf4;border-radius:9px;background:#fff}.attachment-row div{min-width:0}.attachment-row b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}.attachment-row small{display:block;margin-top:3px;color:#8a96a7;font-size:8px}.attachment-empty{padding:8px 0}.attachment-upload{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}.file-input{min-width:0;width:100%;padding:7px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#66758a;font-size:9px}.file-input::file-selector-button{margin-right:8px;border:0;border-radius:7px;padding:6px 9px;background:#edf4ff;color:var(--blue);cursor:pointer}.attachment-note{margin-top:9px}.btn:disabled{cursor:not-allowed;opacity:.58}
 @media(max-width:850px){.auth-page{grid-template-columns:1fr}.auth-visual{display:none}.auth-card{padding:30px}.auth-brand{margin-bottom:38px}.auth-card h1{font-size:27px}}
+@media(max-width:620px){.todo-main{padding:12px}.attachment-section{padding:11px 12px}.attachment-upload{grid-template-columns:1fr}.attachment-upload .btn{width:100%}.todo-meta{display:grid;gap:4px}.attachment-row{align-items:flex-start}.attachment-row .btn{flex:0 0 auto}}
 </style>
 </head>
 <body>
@@ -93,8 +95,23 @@ function mapTodo(row) {
     title: row.title,
     meta: row.note || "",
     priority: row.priority || "medium",
+    createdAt: row.created_at || null,
     completedAt: row.completed_at || null,
+    attachments: [],
     done: Boolean(row.completed_at)
+  };
+}
+
+function mapTodoAttachment(row) {
+  return {
+    id: row.id,
+    todoId: row.todo_id,
+    uploadedBy: row.uploaded_by,
+    name: row.name,
+    storagePath: row.storage_path,
+    mimeType: row.mime_type || "application/octet-stream",
+    sizeBytes: row.size_bytes || 0,
+    createdAt: row.created_at || null
   };
 }
 
@@ -128,26 +145,53 @@ function createAuthService(supabase) {
 
 
 
+const ATTACHMENT_BUCKET = "workbench-files";
+const MAX_ATTACHMENT_SIZE = 20 * 1024 * 1024;
+const MAX_SAFE_FILE_NAME_LENGTH = 120;
+
 function throwIfError(result) {
   if (result.error) throw result.error;
   return result.data;
 }
 
+function getSafeFileName(name) {
+  const baseName = String(name || "file")
+    .split(/[\\/]/)
+    .pop()
+    .trim();
+  return (baseName.replace(/[^\p{L}\p{N}._-]/gu, "-") || "file")
+    .slice(0, MAX_SAFE_FILE_NAME_LENGTH);
+}
+
+function assertSafePathSegment(value, label) {
+  if (!value || /[\\/]/.test(String(value))) {
+    throw new Error(`无效的${label} ID`);
+  }
+}
+
 function createRepository(supabase) {
   return {
     async loadWorkbenchData() {
-      const [profiles, projects, tasks, todos] = await Promise.all([
+      const [profiles, projects, tasks, todos, todoAttachments] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("projects").select("*"),
         supabase.from("tasks").select("*"),
-        supabase.from("todos").select("*")
+        supabase.from("todos").select("*"),
+        supabase.from("todo_attachments").select("*")
       ]);
+
+      const mappedTodos = throwIfError(todos).map(mapTodo);
+      const todosById = new Map(mappedTodos.map((todo) => [todo.id, todo]));
+      for (const row of throwIfError(todoAttachments)) {
+        const attachment = mapTodoAttachment(row);
+        todosById.get(attachment.todoId)?.attachments.push(attachment);
+      }
 
       return {
         users: throwIfError(profiles).map(mapProfile),
         projects: throwIfError(projects).map(mapProject),
         tasks: throwIfError(tasks).map(mapTask),
-        todos: throwIfError(todos).map(mapTodo),
+        todos: mappedTodos,
         reports: [],
         events: [],
         files: []
@@ -204,6 +248,64 @@ function createRepository(supabase) {
           .update({ completed_at: done ? new Date().toISOString() : null })
           .eq("id", id)
       );
+    },
+    async uploadTodoAttachment({ todoId, userId, file }) {
+      assertSafePathSegment(userId, "用户");
+      assertSafePathSegment(todoId, "待办");
+      if (!file || !file.name) {
+        throw new Error("请选择文件");
+      }
+      if (!Number.isFinite(file.size) || file.size <= 0) {
+        throw new Error("不能上传空文件");
+      }
+      if (file.size > MAX_ATTACHMENT_SIZE) {
+        throw new Error("文件不能超过 20 MB");
+      }
+
+      const path = `todos/${userId}/${todoId}/${crypto.randomUUID()}-${getSafeFileName(file.name)}`;
+      throwIfError(
+        await supabase.storage
+          .from(ATTACHMENT_BUCKET)
+          .upload(path, file)
+      );
+
+      try {
+        const row = throwIfError(
+          await supabase
+            .from("todo_attachments")
+            .insert({
+              todo_id: todoId,
+              uploaded_by: userId,
+              name: file.name,
+              storage_path: path,
+              mime_type: file.type || "application/octet-stream",
+              size_bytes: file.size
+            })
+            .select()
+            .single()
+        );
+        return mapTodoAttachment(row);
+      } catch (error) {
+        try {
+          const cleanupResult = await supabase.storage
+            .from(ATTACHMENT_BUCKET)
+            .remove([path]);
+          if (cleanupResult.error) {
+            error.cleanupError = cleanupResult.error;
+          }
+        } catch (cleanupError) {
+          error.cleanupError = cleanupError;
+        }
+        throw error;
+      }
+    },
+    async getAttachmentUrl(path) {
+      const data = throwIfError(
+        await supabase.storage
+          .from(ATTACHMENT_BUCKET)
+          .createSignedUrl(path, 300)
+      );
+      return data.signedUrl;
     }
   };
 }
@@ -251,6 +353,136 @@ function errorView(message) {
 }
 
 
+
+const VALID_ROUTES = new Set(["dashboard", "tasks", "projects", "todos", "team", "settings"]);
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeRoute(route) {
+  return VALID_ROUTES.has(route) ? route : "dashboard";
+}
+
+function clampProgress(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 0;
+  return Math.min(100, Math.max(0, number));
+}
+
+function safeHexColor(value, fallback = "#3478f6") {
+  return /^#[0-9a-f]{6}$/i.test(String(value || "")) ? String(value) : fallback;
+}
+
+function isTaskOverdue(task, today = localDateKey()) {
+  return task.status !== "completed" && task.status !== "cancelled" && task.dueDate < today;
+}
+
+function missingReportUsers(users, reports, date) {
+  const day = new Date(`${date}T12:00:00`).getDay();
+  const submitted = new Set(
+    reports.filter((report) => report.date === date).map((report) => report.userId)
+  );
+  return users.filter(
+    (user) => user.active && user.workdays.includes(day) && !submitted.has(user.id)
+  );
+}
+
+function dashboardMetrics(tasks, today) {
+  const active = tasks.filter((task) => task.status === "in_progress").length;
+  const completed = tasks.filter((task) => task.status === "completed").length;
+  const waitingReview = tasks.filter((task) => task.status === "waiting_review").length;
+  const overdue = tasks.filter((task) => isTaskOverdue(task, today)).length;
+  return {
+    active,
+    completed,
+    waitingReview,
+    overdue,
+    completionRate: tasks.length ? Math.round((completed / tasks.length) * 100) : 0
+  };
+}
+
+function visibleTodosForRole(todos, profile) {
+  if (profile?.role === "manager") return todos;
+  return todos.filter((todo) => todo.userId === profile?.id);
+}
+
+function findVisibleAttachment(todos, profile, storagePath) {
+  for (const todo of visibleTodosForRole(todos, profile)) {
+    const attachment = (todo.attachments || []).find(
+      (item) => item.storagePath === storagePath
+    );
+    if (attachment) return attachment;
+  }
+  return null;
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date);
+}
+
+function parseQuery(input) {
+  const query = input.trim();
+  if (/逾期/.test(query)) return { type: "overdue" };
+  if (/谁.*(没|未).*日报|缺.*日报/.test(query)) return { type: "missing_reports" };
+  const person = query.match(/(?:查看|显示)?\s*([A-Za-z\u4e00-\u9fa5]+)\s*(?:今天|今日).*进度/);
+  if (person) return { type: "person_progress", person: person[1], date: "today" };
+  const project = query.match(/(?:查看|显示)?项目\s+(.+)/);
+  if (project) return { type: "project", project: project[1].trim() };
+  if (/待审核|等待审核/.test(query)) return { type: "waiting_review" };
+  if (/会议|日程/.test(query)) return { type: "meetings" };
+  return { type: "unknown" };
+}
+
+function queryAnswer(parsed, data, today) {
+  if (parsed.type === "overdue") {
+    const items = data.tasks.filter((task) => isTaskOverdue(task, today));
+    return { title: `逾期任务 ${items.length} 项`, items: items.map(taskSummary) };
+  }
+  if (parsed.type === "missing_reports") {
+    const items = missingReportUsers(data.users, data.reports, today);
+    return { title: `缺少今日日报 ${items.length} 人`, items: items.map((user) => user.name) };
+  }
+  if (parsed.type === "waiting_review") {
+    const items = data.tasks.filter((task) => task.status === "waiting_review");
+    return { title: `等待审核 ${items.length} 项`, items: items.map(taskSummary) };
+  }
+  if (parsed.type === "meetings") {
+    return { title: `今日会议 ${data.events.length} 场`, items: data.events.map((event) => `${event.time} ${event.title}`) };
+  }
+  if (parsed.type === "person_progress") {
+    const user = data.users.find((item) => item.name.toLowerCase() === parsed.person.toLowerCase());
+    const items = user ? data.tasks.filter((task) => task.assigneeId === user.id) : [];
+    return { title: user ? `${user.name} 的工作进度` : "未找到该成员", items: items.map(taskSummary) };
+  }
+  if (parsed.type === "project") {
+    const project = data.projects.find((item) => item.name.includes(parsed.project));
+    const items = project ? data.tasks.filter((task) => task.projectId === project.id) : [];
+    return { title: project ? `${project.name} · ${project.progress}%` : "未找到该项目", items: items.map(taskSummary) };
+  }
+  return {
+    title: "暂时无法理解这个问题",
+    items: ["试试：显示逾期任务", "谁还没有提交今天的日报", "查看 Alice 今天的进度", "查看项目 网站产品页优化"]
+  };
+}
+
+function taskSummary(task) {
+  return `${task.title} · ${task.progress}%`;
+}
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     
 const auth = createAuthService(supabase);
@@ -261,8 +493,11 @@ const state = {
   session: null,
   profile: null,
   data: null,
-  route: location.hash.slice(1) || "dashboard"
+  route: normalizeRoute(location.hash.slice(1))
 };
+if (location.hash.slice(1) !== state.route) {
+  history.replaceState(null, "", `#${state.route}`);
+}
 
 const routeLabels = {
   dashboard: ["运营总览", "团队任务和项目进度"],
@@ -284,11 +519,13 @@ async function start() {
   }
 }
 
-async function loadWorkbench() {
-  root.innerHTML = loadingView("正在同步真实数据");
-  state.data = await repository.loadWorkbenchData();
-  state.profile = state.data.users.find((user) => user.id === state.session.user.id);
-  if (!state.profile) throw new Error("当前账号尚未建立成员档案，请联系管理员。");
+async function loadWorkbench({ showLoading = true } = {}) {
+  if (showLoading) root.innerHTML = loadingView("正在同步真实数据");
+  const data = await repository.loadWorkbenchData();
+  const profile = data.users.find((user) => user.id === state.session.user.id);
+  if (!profile) throw new Error("当前账号尚未建立成员档案，请联系管理员。");
+  state.data = data;
+  state.profile = profile;
   enrichProjects();
   renderApp();
 }
@@ -307,7 +544,8 @@ function renderLogin(message = "") {
 }
 
 function renderApp() {
-  const [title, subtitle] = routeLabels[state.route] || routeLabels.dashboard;
+  state.route = normalizeRoute(state.route);
+  const [title, subtitle] = routeLabels[state.route];
   root.innerHTML = `
     <div class="app-shell">
       <aside class="sidebar" id="sidebar">
@@ -342,7 +580,7 @@ function renderApp() {
 }
 
 function navItem(route, icon, text) {
-  return `<a class="nav-item ${state.route === route ? "active" : ""}" href="#${route}">
+  return `<a class="nav-item ${state.route === route ? "active" : ""}" href="#${route}" data-route="${route}">
     <span class="nav-icon">${icon}</span>${text}
   </a>`;
 }
@@ -358,22 +596,26 @@ function renderRoute() {
 
 function dashboardView() {
   const { tasks, projects, todos } = state.data;
+  const visibleTodos = visibleTodosForRole(todos, state.profile);
   const active = tasks.filter((task) => task.status === "in_progress").length;
   const completed = tasks.filter((task) => task.status === "completed").length;
   const review = tasks.filter((task) => task.status === "waiting_review").length;
   const overdue = tasks.filter(isOverdue).length;
   return `
     <section class="kpi-grid">
-      ${kpi("进行中任务", active, "当前正在推进")}
-      ${kpi("已完成任务", completed, "来自真实数据库", "green")}
-      ${kpi("待审核事项", review, "需要管理员处理", "orange")}
-      ${kpi("逾期任务", overdue, "建议优先处理", "red")}
-      ${kpi("今日待办", todos.filter((todo) => !todo.done).length, "个人事项")}
+      ${kpi("进行中任务", active, "当前正在推进", "", "tasks")}
+      ${kpi("已完成任务", completed, "来自真实数据库", "green", "tasks")}
+      ${kpi("待审核事项", review, "需要管理员处理", "orange", "tasks")}
+      ${kpi("逾期任务", overdue, "建议优先处理", "red", "tasks")}
+      ${kpi("今日待办", visibleTodos.filter((todo) => !todo.done).length, state.profile.role === "manager" ? "全部成员待办" : "个人事项", "purple", "todos")}
     </section>
     <section class="dashboard-grid">
-      <div class="panel">${panelTitle("重点任务", "实时同步")}${tasks.length ? taskTable(tasks.slice(0, 6)) : empty("暂无任务")}</div>
-      <div class="panel">${panelTitle("项目进度", `${projects.length} 个项目`)}
+      <div class="panel">${panelTitle("重点任务", "查看全部", "tasks")}${tasks.length ? taskTable(tasks.slice(0, 6)) : empty("暂无任务")}</div>
+      <div class="panel">${panelTitle("项目进度", `${projects.length} 个项目`, "projects")}
         <div class="project-list">${projects.map(projectCard).join("") || empty("暂无项目")}</div>
+      </div>
+      <div class="panel dashboard-todos">${panelTitle(state.profile.role === "manager" ? "成员待办" : "我的待办", "查看全部", "todos")}
+        <div class="todo-list">${visibleTodos.length ? visibleTodos.slice(0, 5).map(todoCard).join("") : empty("暂无待办")}</div>
       </div>
     </section>`;
 }
@@ -385,29 +627,67 @@ function tasksView() {
 function projectsView() {
   const cards = state.data.projects.map((project) => `
     <article class="panel entity-card">
-      <div class="row-between"><h3>${escapeHtml(project.name)}</h3><span class="status">${statusText(project.status)}</span></div>
+      <div class="row-between"><h3>${escapeHtml(project.name)}</h3><span class="status">${escapeHtml(statusText(project.status))}</span></div>
       <p>负责人：${escapeHtml(project.owner || "未分配")}<br>${project.tasks} 项任务 · ${project.overdue} 项逾期</p>
-      <div class="row-between"><b>${project.progress}%</b><span class="hint">${project.dueDate || "未设置日期"}</span></div>
-      <div class="track"><span style="width:${project.progress}%"></span></div>
+      <div class="row-between"><b>${clampProgress(project.progress)}%</b><span class="hint">${escapeHtml(project.dueDate || "未设置日期")}</span></div>
+      <div class="track"><span style="width:${clampProgress(project.progress)}%"></span></div>
     </article>`).join("");
   return `<div class="cards-grid">${cards || empty("暂无项目")}</div>`;
 }
 
 function todosView() {
-  const rows = state.data.todos.map((todo) => `
-    <div class="todo-row">
-      <button class="check ${todo.done ? "done" : ""}" data-action="toggle-todo" data-id="${todo.id}" aria-label="切换完成状态"></button>
-      <div class="${todo.done ? "done-text" : ""}"><b>${escapeHtml(todo.title)}</b><small>${escapeHtml(todo.meta)}</small></div>
-      <span class="chip">${priorityText(todo.priority)}</span>
-    </div>`).join("");
+  const todos = visibleTodosForRole(state.data.todos, state.profile);
+  const rows = todos.map(todoCard).join("");
   return `<div class="toolbar"><span></span><button class="btn btn-primary" data-action="add-todo">+ 添加待办</button></div>
     <div class="panel"><div class="todo-list">${rows || empty("暂无待办")}</div></div>`;
+}
+
+function todoCard(todo) {
+  const owner = state.data.users.find((user) => user.id === todo.userId);
+  const canEdit = todo.userId === state.profile.id;
+  const attachments = (todo.attachments || []).map((attachment) => `
+    <li class="attachment-row">
+      <div>
+        <b>${escapeHtml(attachment.name)}</b>
+        <small>${formatFileSize(attachment.sizeBytes)} · ${escapeHtml(formatDateTime(attachment.createdAt))}</small>
+      </div>
+      <button class="btn btn-soft" data-action="view-attachment" data-path="${escapeHtml(attachment.storagePath)}">查看</button>
+    </li>`).join("");
+  return `
+    <article class="todo-card" data-todo-id="${escapeHtml(todo.id)}">
+      <div class="todo-main">
+        ${canEdit
+          ? `<button class="check ${todo.done ? "done" : ""}" data-action="toggle-todo" data-id="${escapeHtml(todo.id)}" aria-label="切换完成状态"></button>`
+          : `<span class="check read-only ${todo.done ? "done" : ""}" aria-label="${todo.done ? "已完成" : "未完成"}"></span>`}
+        <div class="todo-content">
+          <div class="row-between">
+            <b class="${todo.done ? "done-text" : ""}">${escapeHtml(todo.title)}</b>
+            <span class="chip">${escapeHtml(priorityText(todo.priority))}</span>
+          </div>
+          ${todo.meta ? `<p>${escapeHtml(todo.meta)}</p>` : ""}
+          <div class="todo-meta">
+            ${state.profile.role === "manager" ? `<span>成员：${escapeHtml(owner?.name || "未知成员")}</span>` : ""}
+            <span>创建：${escapeHtml(formatDateTime(todo.createdAt) || "时间未知")}</span>
+            ${todo.completedAt ? `<span>完成：${escapeHtml(formatDateTime(todo.completedAt))}</span>` : ""}
+          </div>
+        </div>
+      </div>
+      <div class="attachment-section">
+        <div class="attachment-title"><b>附件</b><span>${(todo.attachments || []).length} 个</span></div>
+        <ul class="attachment-list">${attachments || '<li class="attachment-empty">暂未上传附件</li>'}</ul>
+        ${canEdit ? `
+          <div class="attachment-upload">
+            <input class="file-input" id="todo-file-${escapeHtml(todo.id)}" data-file-for="${escapeHtml(todo.id)}" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt">
+            <button class="btn btn-primary" data-action="upload-attachment" data-id="${escapeHtml(todo.id)}">上传附件</button>
+          </div>` : '<div class="attachment-note">附件由待办所属成员上传，管理员可直接查看。</div>'}
+      </div>
+    </article>`;
 }
 
 function teamView() {
   return `<div class="cards-grid">${state.data.users.map((user) => `
     <article class="panel entity-card">
-      <div class="row-between"><h3><span class="avatar" style="background:${user.color}">${escapeHtml(user.name[0] || "?")}</span>${escapeHtml(user.name)}</h3><span class="status">${user.active ? "启用" : "停用"}</span></div>
+      <div class="row-between"><h3><span class="avatar" style="background:${safeHexColor(user.color)}">${escapeHtml(user.name[0] || "?")}</span>${escapeHtml(user.name)}</h3><span class="status">${user.active ? "启用" : "停用"}</span></div>
       <p>${user.role === "manager" ? "管理员" : "成员"}<br>${escapeHtml(user.department || "未设置部门")}</p>
     </article>`).join("")}</div>`;
 }
@@ -426,21 +706,22 @@ function taskTable(tasks) {
       <td><b>${escapeHtml(task.title)}</b><small class="cell-note">${escapeHtml(task.latest)}</small></td>
       <td>${escapeHtml(userName(task.assigneeId))}</td>
       <td>${escapeHtml(projectName(task.projectId))}</td>
-      <td><span class="status ${isOverdue(task) ? "red" : ""}">${statusText(task.status)}</span></td>
-      <td>${task.progress}%</td><td>${task.dueDate || "-"}</td>
-      ${state.profile.role === "manager" ? `<td>${task.status === "waiting_review" ? `<button class="btn btn-soft" data-action="approve" data-id="${task.id}">通过</button>` : ""}</td>` : ""}
+      <td><span class="status ${isOverdue(task) ? "red" : ""}">${escapeHtml(statusText(task.status))}</span></td>
+      <td>${clampProgress(task.progress)}%</td><td>${escapeHtml(task.dueDate || "-")}</td>
+      ${state.profile.role === "manager" ? `<td>${task.status === "waiting_review" ? `<button class="btn btn-soft" data-action="approve" data-id="${escapeHtml(task.id)}">通过</button>` : ""}</td>` : ""}
     </tr>`).join("")}</tbody></table></div>`;
 }
 
 function projectCard(project) {
-  return `<div class="project-card"><div class="project-head"><b>${escapeHtml(project.name)}</b><span>${project.progress}%</span></div><p>${statusText(project.status)}</p><div class="track"><span style="width:${project.progress}%"></span></div></div>`;
+  const progress = clampProgress(project.progress);
+  return `<div class="project-card"><div class="project-head"><b>${escapeHtml(project.name)}</b><span>${progress}%</span></div><p>${escapeHtml(statusText(project.status))}</p><div class="track"><span style="width:${progress}%"></span></div></div>`;
 }
 
 function openTaskModal() {
   modal(`<h2>新建任务</h2><form data-action="save-task"><div class="form-grid">
     <label class="field full">任务名称<input name="title" required></label>
-    <label class="field">负责人<select name="assigneeId">${state.data.users.map((user) => `<option value="${user.id}">${escapeHtml(user.name)}</option>`).join("")}</select></label>
-    <label class="field">所属项目<select name="projectId"><option value="">无项目</option>${state.data.projects.map((project) => `<option value="${project.id}">${escapeHtml(project.name)}</option>`).join("")}</select></label>
+    <label class="field">负责人<select name="assigneeId">${state.data.users.map((user) => `<option value="${escapeHtml(user.id)}">${escapeHtml(user.name)}</option>`).join("")}</select></label>
+    <label class="field">所属项目<select name="projectId"><option value="">无项目</option>${state.data.projects.map((project) => `<option value="${escapeHtml(project.id)}">${escapeHtml(project.name)}</option>`).join("")}</select></label>
     <label class="field">优先级<select name="priority"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></label>
     <label class="field">截止日期<input name="dueDate" type="date" required></label>
     </div><div class="modal-actions"><button type="button" class="btn" data-action="close-modal">取消</button><button class="btn btn-primary">创建任务</button></div></form>`);
@@ -454,23 +735,74 @@ function openTodoModal() {
     </div><div class="modal-actions"><button type="button" class="btn" data-action="close-modal">取消</button><button class="btn btn-primary">添加</button></div></form>`);
 }
 
-async function withWrite(action, successMessage) {
+async function refreshAfterSuccessfulWrite(successMessage, staleMessage) {
   try {
-    await action();
-    await loadWorkbench();
+    await loadWorkbench({ showLoading: false });
     toast(successMessage);
-  } catch (error) {
+  } catch {
     renderApp();
-    toast(error.message || "操作失败，请重试", true);
+    toast(staleMessage, true);
   }
 }
 
+async function withWrite(
+  action,
+  successMessage,
+  staleMessage,
+  button,
+  busyText = "处理中...",
+  afterSaved
+) {
+  const originalText = button?.textContent;
+  if (button) {
+    if (button.disabled) return false;
+    button.disabled = true;
+    button.textContent = busyText;
+  }
+  try {
+    await action();
+  } catch (error) {
+    if (button?.isConnected) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+    toast(error.message || "操作失败，请重试", true);
+    return false;
+  }
+
+  afterSaved?.();
+  await refreshAfterSuccessfulWrite(successMessage, staleMessage);
+  if (button?.isConnected) {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
+  return true;
+}
+
 window.addEventListener("hashchange", () => {
-  state.route = location.hash.slice(1) || "dashboard";
+  const requestedRoute = location.hash.slice(1);
+  state.route = normalizeRoute(requestedRoute);
+  if (requestedRoute !== state.route) {
+    history.replaceState(null, "", `#${state.route}`);
+  }
   if (state.data) renderApp();
 });
 
 document.addEventListener("click", async (event) => {
+  const routeTarget = event.target.closest("[data-route]");
+  if (routeTarget) {
+    event.preventDefault();
+    const route = normalizeRoute(routeTarget.dataset.route);
+    state.route = route;
+    if (location.hash !== `#${route}`) {
+      location.hash = route;
+    } else if (state.data) {
+      renderApp();
+    }
+    document.querySelector("#sidebar")?.classList.remove("open");
+    return;
+  }
+
   const target = event.target.closest("[data-action]");
   if (!target) return;
   const action = target.dataset.action;
@@ -483,19 +815,116 @@ document.addEventListener("click", async (event) => {
     state.data = null;
     renderLogin();
   }
-  if (action === "new-task") openTaskModal();
+  if (action === "new-task") {
+    if (state.profile.role !== "manager") {
+      toast("仅管理员可以新建任务", true);
+      return;
+    }
+    openTaskModal();
+  }
   if (action === "add-todo") openTodoModal();
   if (action === "close-modal") closeModal();
   if (action === "approve") {
+    if (state.profile.role !== "manager") {
+      toast("仅管理员可以审核任务", true);
+      return;
+    }
     await withWrite(
       () => repository.updateTask(target.dataset.id, { status: "completed", progress: 100, latest: "管理员审核通过" }),
-      "任务已审核通过"
+      "任务已审核通过",
+      "任务已保存，但数据刷新失败，请刷新页面",
+      target,
+      "审核中..."
     );
   }
   if (action === "toggle-todo") {
     const todo = state.data.todos.find((item) => item.id === target.dataset.id);
-    await withWrite(() => repository.setTodoDone(todo.id, !todo.done), "待办状态已更新");
+    if (!todo) return;
+    if (todo.userId !== state.profile.id) {
+      toast("只能更新自己的待办", true);
+      return;
+    }
+    await withWrite(
+      () => repository.setTodoDone(todo.id, !todo.done),
+      "待办状态已更新",
+      "待办已保存，但数据刷新失败，请刷新页面",
+      target,
+      "..."
+    );
   }
+  if (action === "upload-attachment") {
+    const todo = state.data.todos.find((item) => item.id === target.dataset.id);
+    const input = document.getElementById(`todo-file-${target.dataset.id}`);
+    const file = input?.files?.[0];
+    if (!todo || todo.userId !== state.profile.id) {
+      toast("只能给自己的待办上传附件", true);
+      return;
+    }
+    if (!file) {
+      toast("请先选择要上传的文件", true);
+      return;
+    }
+
+    const originalText = target.textContent;
+    target.disabled = true;
+    target.textContent = "上传中...";
+    try {
+      await repository.uploadTodoAttachment({
+        todoId: todo.id,
+        userId: state.profile.id,
+        file
+      });
+    } catch (error) {
+      target.disabled = false;
+      target.textContent = originalText;
+      toast(error.message || "附件上传失败，请重试", true);
+      return;
+    }
+    input.value = "";
+    await refreshAfterSuccessfulWrite(
+      "附件上传成功",
+      "附件已上传，但数据刷新失败，请刷新页面"
+    );
+    if (target.isConnected) {
+      target.disabled = false;
+      target.textContent = originalText;
+    }
+  }
+  if (action === "view-attachment") {
+    const attachment = findVisibleAttachment(
+      state.data.todos,
+      state.profile,
+      target.dataset.path
+    );
+    if (!attachment) {
+      toast("无权查看该附件，或附件已不存在", true);
+      return;
+    }
+    const opened = window.open("about:blank", "_blank");
+    if (!opened) {
+      toast("浏览器阻止了新窗口，请允许本站弹窗后重试", true);
+      return;
+    }
+    opened.opener = null;
+    target.disabled = true;
+    try {
+      const url = await repository.getAttachmentUrl(attachment.storagePath);
+      opened.location.replace(url);
+    } catch (error) {
+      opened.close();
+      toast(error.message || "附件打开失败，请重试", true);
+    } finally {
+      target.disabled = false;
+    }
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const target = event.target.closest('[data-route][role="link"]');
+  if (!target) return;
+  event.preventDefault();
+  target.click();
 });
 
 document.addEventListener("submit", async (event) => {
@@ -514,12 +943,32 @@ document.addEventListener("submit", async (event) => {
     }
   }
   if (action === "save-task") {
-    closeModal();
-    await withWrite(() => repository.createTask({ ...values, createdBy: state.profile.id }), "任务已创建");
+    if (state.profile.role !== "manager") {
+      toast("仅管理员可以新建任务", true);
+      return;
+    }
+    const submitButton = getSubmitButton(event);
+    const succeeded = await withWrite(
+      () => repository.createTask({ ...values, createdBy: state.profile.id }),
+      "任务已创建",
+      "任务已保存，但数据刷新失败，请刷新页面",
+      submitButton,
+      "创建中...",
+      () => event.target.reset()
+    );
+    if (succeeded) closeModal();
   }
   if (action === "save-todo") {
-    closeModal();
-    await withWrite(() => repository.createTodo({ ...values, userId: state.profile.id }), "待办已添加");
+    const submitButton = getSubmitButton(event);
+    const succeeded = await withWrite(
+      () => repository.createTodo({ ...values, userId: state.profile.id }),
+      "待办已添加",
+      "待办已保存，但数据刷新失败，请刷新页面",
+      submitButton,
+      "添加中...",
+      () => event.target.reset()
+    );
+    if (succeeded) closeModal();
   }
 });
 
@@ -529,28 +978,39 @@ function modal(content) {
 function closeModal() {
   document.querySelector("#modal-root").innerHTML = "";
 }
+function getSubmitButton(event) {
+  return event.submitter || event.target.querySelector('button[type="submit"], button:not([type])');
+}
 function toast(message, error = false) {
   const toastRoot = document.querySelector("#toast-root");
   toastRoot.innerHTML = `<div class="toast ${error ? "toast-error" : ""}">${escapeHtml(message)}</div>`;
   setTimeout(() => { toastRoot.innerHTML = ""; }, 2500);
 }
-function kpi(title, value, hint, color = "") {
-  return `<div class="card kpi"><div class="kpi-head">${title}<span class="iconbox ${color}">${value}</span></div><div class="kpi-value">${value}</div><div class="hint">${hint}</div></div>`;
+function kpi(title, value, hint, color = "", route = "") {
+  const routeAttribute = route ? ` data-route="${route}" role="link" tabindex="0"` : "";
+  return `<div class="card kpi ${route ? "clickable-card" : ""}"${routeAttribute}><div class="kpi-head">${escapeHtml(title)}<span class="iconbox ${color}">${value}</span></div><div class="kpi-value">${value}</div><div class="hint">${escapeHtml(hint)}</div></div>`;
 }
-function panelTitle(title, action) {
-  return `<div class="panel-title"><h2>${title}</h2><span class="text-link">${action}</span></div>`;
+function panelTitle(title, action, route = "") {
+  const routeAttribute = route ? ` data-route="${route}" role="link" tabindex="0"` : "";
+  return `<div class="panel-title"><h2>${escapeHtml(title)}</h2><span class="text-link"${routeAttribute}>${escapeHtml(action)}</span></div>`;
 }
 function empty(text) {
   return `<div class="empty">${text}</div>`;
 }
 function isOverdue(task) {
-  return task.status !== "completed" && task.status !== "cancelled" && task.dueDate < new Date().toISOString().slice(0, 10);
+  return isTaskOverdue(task);
 }
 function statusText(status) {
   return ({ pending: "待处理", in_progress: "进行中", waiting_review: "待审核", completed: "已完成", cancelled: "已取消", planning: "规划中" })[status] || status || "未知";
 }
 function priorityText(priority) {
   return ({ high: "高", medium: "中", low: "低" })[priority] || priority;
+}
+function formatFileSize(bytes = 0) {
+  const safeBytes = Number.isFinite(Number(bytes)) && Number(bytes) >= 0 ? Number(bytes) : 0;
+  if (safeBytes < 1024) return `${safeBytes} B`;
+  if (safeBytes < 1024 * 1024) return `${(safeBytes / 1024).toFixed(1)} KB`;
+  return `${(safeBytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 function userName(id) {
   return state.data.users.find((user) => user.id === id)?.name || "未分配";
